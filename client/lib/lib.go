@@ -450,6 +450,15 @@ func getServerHostname() string {
 	return "https://api.hishtory.dev"
 }
 
+func getServerBasicAuth() (username string, password string, useBasicAuth bool) {
+	username = os.Getenv("HISHTORY_BASICAUTH_USERNAME")
+	password = os.Getenv("HISHTORY_BASICAUTH_PASSWORD")
+	if username == "" || password == "" {
+		return "", "", false
+	}
+	return username, password, true
+}
+
 func httpClient() *http.Client {
 	return &http.Client{}
 }
@@ -462,6 +471,10 @@ func ApiGet(ctx context.Context, path string) ([]byte, error) {
 	req, err := http.NewRequest("GET", getServerHostname()+path, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create GET: %w", err)
+	}
+	username, password, useBasicAuth := getServerBasicAuth()
+	if useBasicAuth {
+		req.SetBasicAuth(username, password)
 	}
 	req.Header.Set("X-Hishtory-Version", "v0."+Version)
 	req.Header.Set("X-Hishtory-Device-Id", hctx.GetConf(ctx).DeviceId)
@@ -491,6 +504,10 @@ func ApiPost(ctx context.Context, path, contentType string, reqBody []byte) ([]b
 	req, err := http.NewRequest("POST", getServerHostname()+path, bytes.NewBuffer(reqBody))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create POST: %w", err)
+	}
+	username, password, useBasicAuth := getServerBasicAuth()
+	if useBasicAuth {
+		req.SetBasicAuth(username, password)
 	}
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("X-Hishtory-Version", "v0."+Version)
@@ -522,6 +539,7 @@ func IsOfflineError(ctx context.Context, err error) bool {
 		strings.Contains(err.Error(), "connect: network is unreachable") ||
 		strings.Contains(err.Error(), "read: connection reset by peer") ||
 		strings.Contains(err.Error(), ": EOF") ||
+		strings.Contains(err.Error(), ": status_code=401") || // authentication failure
 		strings.Contains(err.Error(), ": status_code=502") ||
 		strings.Contains(err.Error(), ": status_code=503") ||
 		strings.Contains(err.Error(), ": i/o timeout") ||
@@ -902,7 +920,7 @@ func getAllCustomColumnNames(ctx context.Context) ([]string, error) {
 	rows, err := RetryingDbFunctionWithResult(func() (*sql.Rows, error) {
 		query := `
 		SELECT DISTINCT json_extract(value, '$.name') as cc_name
-		FROM history_entries 
+		FROM history_entries
 		JOIN json_each(custom_columns)
 		WHERE value IS NOT NULL`
 		return db.Raw(query).Rows()

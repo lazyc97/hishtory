@@ -123,7 +123,7 @@ func maybeUploadSkippedHistoryEntries(ctx context.Context) error {
 func handlePotentialUploadFailure(ctx context.Context, err error, config *hctx.ClientConfig, entryTimestamp time.Time) {
 	if err != nil {
 		if lib.IsOfflineError(ctx, err) {
-			hctx.GetLogger().Infof("Failed to remotely persist hishtory entry because we failed to connect to the remote server! This is likely because the device is offline, but also could be because the remote server is having reliability issues. Original error: %v", err)
+			hctx.GetLogger().Infof("Failed to remotely persist hishtory entry because we failed to connect to the remote server! This is likely because the device is offline or incorrect username/password, but also could be because the remote server is having reliability issues. Original error: %v", err)
 			if !config.HaveMissedUploads {
 				config.HaveMissedUploads = true
 				// Set MissedUploadTimestamp to `entry timestamp - 1` so that the current entry will get

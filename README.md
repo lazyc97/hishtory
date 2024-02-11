@@ -167,6 +167,7 @@ A few configuration options:
 
 * If you want to use a SQLite backend, you can do so by setting the `HISHTORY_SQLITE_DB` environment variable to point to a file. It will then create a SQLite DB at the given location.
 * If you want to limit the number of users that your server allows (e.g. because you only intend to use the server for yourself), you can set the environment variable `HISHTORY_MAX_NUM_USERS=1` (or to whatever value you wish for the limit to be). Leave it unset to allow registrations with no cap.
+* Although data is end-to-end encrypted, outsiders may use your instance for free if it is publicly accessible. In case you want to prevent that, set 2 environment variables `HISHTORY_BASICAUTH_USERNAME` and ``HISHTORY_BASICAUTH_PASSWORD` on both server side and client side.
 
 </blockquote></details>
 

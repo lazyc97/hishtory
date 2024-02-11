@@ -431,7 +431,7 @@ func (m model) View() string {
 		additionalMessages = append(additionalMessages, fmt.Sprintf("%s Loading hishtory entries from other devices...", m.spinner.View()))
 	}
 	if m.isOffline {
-		additionalMessages = append(additionalMessages, "Warning: failed to contact the hishtory backend (are you offline?), so some results may be stale")
+		additionalMessages = append(additionalMessages, "Warning: failed to contact the hishtory backend (are you offline or incorrectly set username/password?), so some results may be stale")
 	}
 	if m.searchErr != nil {
 		additionalMessages = append(additionalMessages, fmt.Sprintf("Warning: failed to search: %v", m.searchErr))
